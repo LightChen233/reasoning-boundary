@@ -30,7 +30,7 @@
 
 <p align="center">
   	<b>
-    | [<a href="https://arxiv.org/abs/2410.05695">ArXiv</a>] | [<a href="https://huggingface.co/datasets/LightChen2333/BigGSM">🤗HuggingFace</a>] |
+    | <a hred="https://proceedings.neurips.cc/paper_files/paper/2024/hash/62ab1c2cb4b03e717005479efb211841-Abstract-Conference.html">NeurIPS (Oral)</a> | [<a href="https://arxiv.org/abs/2410.05695">ArXiv</a>] | [<a href="https://huggingface.co/datasets/LightChen2333/BigGSM">🤗HuggingFace</a>] |
     </b>
     <br />
 </p>
@@ -38,6 +38,7 @@
 🌟 Any contributions via PRs, issues, emails or other methods are greatly appreciated.
 
 ## 🔥News
+- 🎖️ **We update our work to RBF++ and introduce BigGSM++ for quantify the reasoning boundary in multimodal and long chain-of-thought reasoning scenarios.**
 - 🎖️ **Our work is accepted by NeurIPS 2024 (<span style="color:red">Oral</span>).**
 - 🔥 **We have release benchmark on \[[🤗HuggingFace](https://huggingface.co/datasets/LightChen2333/BigGSM)\].**
 - 🔥 **The paper is also available on \[[ArXiv](https://arxiv.org/abs/2410.05695)\].**
@@ -67,7 +68,7 @@ dataset = datasets.load_dataset("LightChen2333/BigGSM")
 ### 2. Install from git
 Our code requires `Python>=3.10`
 ```bash 
-git clone https://github.com/LightChen233/reasoning-granularity.git && cd reasoning-granularity/
+git clone https://github.com/LightChen233/reasoning-boundary.git && cd reasoning-boundary/
 pip install -r requirements.txt
 ```
 ### 3. Evaluation for reproduction
@@ -112,14 +113,14 @@ python evaluate.py --data_split custom \
 root
 ├── data                            # data folder where the BigGSM dataset is loaded
 ├── experiment                      # All experimental data
-│   ├── arithmetic-calculation      # Experimental results under arithmetic-calculation scenarios.
-│   └── mathematical-reasoning      # Experimental results under mathematical-reasoning scenarios.
+│   ├── RBF                         # Experimental results for RBF.
+│   └── RBF++                       # Experimental results under RBF++.
 ├── utils                           # Tool library folder
 │   ├── data.py                     # Dataset loading class
 │   ├── request_tool.py             # API request tool
 │   └── tools.py                    # Common-used tools
-├── draw_rg.py                      # Draw reasoning granularity script
-└── evaluate.py                     # Evaluation script
+├── draw_bound_*.py                      # Draw reasoning boundary script
+└── evaluate_*.py                     # Evaluation script
 ```
 
 ## ✒️ Reference

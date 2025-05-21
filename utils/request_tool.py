@@ -3,6 +3,7 @@ from copy import deepcopy
 import json
 import os
 import re
+from typing import List
 from tqdm import tqdm
 
 from utils.tools import read_jsonl, write_jsonl
@@ -17,13 +18,16 @@ def judge_error(pred):
 class RequestOutput:
     def __init__(self, load_path, auto_index=True) -> None:
         temp_list = []
+        input_data = read_jsonl(load_path)
         if auto_index:
-            for i, temp in enumerate(read_jsonl(load_path)):
-                temp["index"] = str(i)
+            for i, temp in enumerate(input_data):
                 temp_list.append(temp)
-            self.data = sorted(read_jsonl(load_path), key=lambda x: int(x["index"]))
+            self.data = sorted(input_data, key=lambda x: int(x["index"]))
         else:
-            self.data = read_jsonl(load_path)
+            if "index" in input_data[0]:
+                self.data = sorted(input_data, key=lambda x: int(x["index"]))
+            else:
+                self.data = read_jsonl(load_path)
     
     def save(self, save_path):
         write_jsonl(save_path, self.data, mode="w")
@@ -104,8 +108,6 @@ class RequestOutput:
                 exec(pred_str.strip(), g, l)
                 return l["solver"]()
             except Exception as e:
-                # print(e)
-                # print(pred_str)
                 return -1
     
     def get_text_answer(self, idx):
@@ -122,7 +124,96 @@ class RequestOutput:
             pred = self.get_program_answer(idx)
 
         return judge_error(pred) and abs(abs(round(float(pred), 2)) - abs(round(golden_answer, 2))) < 0.01
+    
+    def __extract_math_answer__(self, idx, response_data):
+        pred_str = [s for s in [""] + re.findall(r'\$(.*?)\$', response_data.get_last_pred_text(idx).replace("\$", "").replace("$$", "$"))][-1].replace("$", "")
+        if pred_str == "":
+            pred_str = [s for s in [""] + re.findall(r'\\\((.*?)\\\)', response_data.get_last_pred_text(idx))][-1].replace("\(", "").replace("\)", "")
+        return pred_str
 
+    def judge_math_correct(self, idx, mode="nl"):
+        golden_answer_str = self.get_origin_input(idx)["answer"].replace("$", "").replace("\(", "").replace("\)", "")
+        if mode == "nl":
+            pred_str = self.__extract_math_answer__(idx, self)
+        elif mode == "tool":
+            pred_str = self.get_parsed_pred_answer(idx)
+        elif mode == "pot":
+            pred_str = self.get_program_answer(idx)
+        return golden_answer_str == pred_str
+
+    def judge_self_consistency_correct(self, idx, mode="nl", response_list:List=None):
+        if mode == "multi-choice":
+            golden_answer_str = self.get_origin_input(idx)["answer"]
+            pred_str = self.__extract_choice__(idx, self)
+        else:
+            golden_answer_str = self.get_origin_input(idx)["answer"].replace("$", "").replace("\(", "").replace("\)", "")
+            pred_str = self.__extract_math_answer__(idx, self)
+        max_dict = {pred_str: 1}
+        if response_list is not None:
+            for res in response_list:
+                if mode == "multi-choice":
+                    pred_str = self.__extract_choice__(idx, res)
+                else:
+                    pred_str = self.__extract_math_answer__(idx, res)
+                if pred_str not in max_dict:
+                    max_dict[pred_str] = 0
+                max_dict[pred_str] += 1
+        max_idx, max_time = "", -1
+        for key in max_dict:
+            if max_dict[key] > max_time:
+                max_time = max_dict[key]
+                max_idx = key
+        return golden_answer_str == max_idx
+
+    def __extract_choice__(self, idx, response_data):
+        ALPHA_MAP = ["A", "B", "C", "D", "E", "F"]
+        
+        choices = response_data.get_origin_input(idx)["choices"]
+        text = response_data.get_last_pred_text(idx)
+        if "[Answer]" in text:
+            text = text.split("[Answer]")[-1].split("[Rationale]")[0].split("[Context]")[0]
+        pattern = re.compile(r'\(([A-Za-z])\)')
+        res = pattern.findall(text)
+        if len(res) >= 1:
+            pred = res[-1].upper()  # 'A', 'B', ...
+        else:
+            res = []
+            for i, choice in enumerate(choices):
+                if choice.lower() in text.lower():
+                    res.append(ALPHA_MAP[i])
+            if len(res) >= 1:
+                pred = res[-1]
+            else:
+                for i, choice in enumerate(choices):
+                    text = re.sub(r'[\n.,!?]', ' ', text)
+                    if ALPHA_MAP[i] in text.split(" "):
+                        res.append(ALPHA_MAP[i])
+                if len(res) >= 1:
+                    pred = res[-1]
+                else:
+                    for i, choice in enumerate(choices):
+                        text = re.sub(r'[\n.,!?]', ' ', text)
+                        if ALPHA_MAP[i].lower() in text.split(" "):
+                            res.append(ALPHA_MAP[i])
+                    if len(res) >= 1:
+                        pred = res[-1]
+                    else:
+                        pred = "FAILED"
+        return pred
+
+    def judge_multi_choice_correct(self, idx, mode="nl"):
+        answer = self.get_origin_input(idx)["answer"]
+        if mode == "nl":
+            pred = self.__extract_choice__(idx, self)
+        elif mode == "tool":
+            pred = self.get_parsed_pred_answer(idx)
+        elif mode == "pot":
+            pred = self.get_program_answer(idx)
+        
+        if pred == answer:
+            return True
+        else:
+            return False
 class MMRequestor:
     def __init__(self,
                  model_type="gpt",
@@ -148,7 +239,7 @@ class MMRequestor:
     async def request(self, prompts, **kargs):
         
         if self.model_type == "gpt":
-            if isinstance(prompts, list):
+            if isinstance(prompts, list) and isinstance(prompts[0], str):
                 for prompt in prompts:
                     self.chat.append({
                         "role": "user",
@@ -166,18 +257,25 @@ class MMRequestor:
                         "role": "assistant",
                         "content": [{
                             "type": "text",
+                            "reasoning": response.choices[0].message.model_extra['reasoning_content'],
                             "text": response.choices[0].message.content,
                         }]
                     })
             else:
                 prompt = prompts
-                self.chat.append({
+                if isinstance(prompt, list) and isinstance(prompt[0], dict):
+                    self.chat.append({
                     "role": "user",
-                    "content": [{
-                            "type": "text",
-                            "text": prompt,
-                        }],
-                })
+                    "content": prompt,
+                    })
+                else:
+                    self.chat.append({
+                        "role": "user",
+                        "content": [{
+                                "type": "text",
+                                "text": prompt,
+                            }],
+                    })
                 response = await self.requestor.chat.completions.create(
                     model=self.model_name,
                     messages=self.chat,
@@ -187,6 +285,7 @@ class MMRequestor:
                     "role": "assistant",
                     "content": [{
                         "type": "text",
+                        "reasoning": response.choices[0].message.model_extra['reasoning_content'] if 'reasoning_content' in response.choices[0].message.model_extra else "",
                         "text": response.choices[0].message.content,
                     }]
                 })
@@ -212,7 +311,7 @@ async def producer(queue, dataset, save_path, bar, create_prompt):
             print(f"Skip {data['index']}")
             continue
         prompt = create_prompt(data)
-        print("Loaded\t\t#", i)
+        print("Loaded\t\t#", data['index'])
         data.update({"index": data["index"], "text": prompt})
         await queue.put(data)
     print("Dataset Loaded.")

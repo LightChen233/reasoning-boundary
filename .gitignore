@@ -162,3 +162,14 @@ cython_debug/
 #.idea/
 ._*
 test*
+.DS_Store
+.vscode/launch.json
+.vscode/settings.json
+data/data.zip
+
+data/m3cot/*
+data/olympiadbench/*
+data/get_data.py
+data/m3cot/
+data/m3cot.zip
+data/olympiadbench.zip

@@ -2,7 +2,7 @@
 Author: Qiguang Chen
 LastEditors: Qiguang Chen
 Date: 2023-10-13 14:24:40
-LastEditTime: 2024-03-14 21:48:48
+LastEditTime: 2025-05-14 21:48:48
 Description: 
 
 '''
@@ -84,7 +84,7 @@ def evaluate_expression(expression):
     return value, max_dict
 
 
-def get_combined_granularity(origin_data, return_dict=False):
+def get_combined_boundary(origin_data, return_dict=False):
     N = 1.6e5
     M = 7.0
     SIGMA = 20000
@@ -99,19 +99,106 @@ def get_combined_granularity(origin_data, return_dict=False):
         if max_time < max_dict["time"]:
             max_time = max_dict["time"]
     
-    calculate_granularity = max_time
+    calculate_boundary = max_time
     
     if len(operation_list) == len(origin_eqs):
-        plan_granularity= len([x for x in origin_eqs if not x.strip("0.").startswith("0")])
+        plan_boundary= len([x for x in origin_eqs if not x.strip("0.").startswith("0")])
     else:
-        plan_granularity = len(operation_list)
+        plan_boundary = len(operation_list)
     if return_dict:
         return {
-            "plan_granularity": plan_granularity,
-            "calculate_granularity": calculate_granularity,
-            "combined_granularity": 1/(M/plan_granularity + N/(calculate_granularity + SIGMA))
+            "plan_boundary": plan_boundary,
+            "calculate_boundary": calculate_boundary,
+            "combined_boundary": 1/(M/plan_boundary + N/(calculate_boundary + SIGMA)) if plan_boundary != 0 and calculate_boundary + SIGMA != 0 else 0
         }
-    return 1/(M/plan_granularity + N/(calculate_granularity + SIGMA))
+    return 1/(M/plan_boundary + N/(calculate_boundary + SIGMA))
 
 
+def get_mm_combined_boundary(origin_data, return_dict=False):
+    N1, B1 = 3, 0
+    N2, B2 = 7, 0
+    N3, B3 = 1, -10
+    DOMAIN_PERFORMANCE_DICT = {
+        "language-science": 92.20,
+        "natural-science": 56.06,
+        "social-science": 40.17,
+        "physical-commonsense": 88.64,
+        "social-commonsense": 74.89,
+        "temporal-commonsense": 74.38,
+        "algebra": 39.57,
+        "geometry": 14.29,
+        "theory": 35.29 
+    }
+    global_boundary = origin_data['global_bound']
+    local_boundary = origin_data['local_bound']
+    domain_boundary = 100-DOMAIN_PERFORMANCE_DICT[origin_data['topic']]
+    if return_dict:
+        return {
+            "global_boundary": global_boundary,
+            "local_boundary": local_boundary,
+            "domain_boundary": domain_boundary,
+            "combined_boundary": 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2) + N3/(domain_boundary + B3))
+        }
+    return 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2) + N3/(domain_boundary + B3))
+
+
+def get_multilingual_combined_boundary(origin_data, return_dict=False):
+    N1, B1 = 7, 0
+    N2, B2 = 1.6e5, 20000
+    N3, B3 = 1, 0
+    LANG_DICT = {"en": 72.8, "bn": 33.6, "de": 56.0,
+                 "es": 61.2, "fr": 62.0, "ja": 52.8,
+                 "ru": 62.0, "sw": 48.0, "te": 7.6, 
+                 "th": 42.4, "zh": 60.0}
+    global_boundary = origin_data['global_bound']
+    max_time = 2
+    origin_eqs = [s for s in re.findall(r'<<(.*)?>>', origin_data["answer"])]
+    for eq0 in origin_eqs:
+        _, max_dict = evaluate_expression(eq0.split("=")[0])
+        if max_time < max_dict["time"]:
+            max_time = max_dict["time"]
     
+    calculate_boundary = max_time
+    local_boundary = calculate_boundary# origin_data['local_bound']
+    language_boundary = 100-LANG_DICT[origin_data['lang']]
+    if return_dict:
+        return {
+            "global_boundary": global_boundary,
+            "local_boundary": local_boundary,
+            "language_boundary": language_boundary,
+            "combined_boundary": 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2) + N3/(language_boundary + B3)) if global_boundary + B1 != 0 and local_boundary + B2 != 0 and language_boundary + B3 != 0 else 0
+        }
+    return 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2) + N3/(language_boundary + B3))
+
+def get_multi_hop_boundary(origin_data, return_dict=False):
+    N1 = 10
+    N2 = 10
+    B2 = 0.2
+    B2 = 0.2
+    # if enable_cot:
+    #     return abs(r1/M + (r2 + SIGMA)/N - 0.4)
+    # else:
+    #     # return r1/M * (r2 + SIGMA)/N * 9.8 - 0.2
+    #     return abs(r1/M*2 + (r2 + SIGMA)/N - 0.4)
+    DOMAIN_PERFORMANCE_DICT = {
+        "language-science": 92.20,
+        "natural-science": 56.06,
+        "social-science": 40.17,
+        "physical-commonsense": 88.64,
+        "social-commonsense": 74.89,
+        "temporal-commonsense": 74.38,
+        "algebra": 39.57,
+        "geometry": 14.29,
+        "theory": 35.29 
+    }
+    global_boundary = origin_data['global_bound']
+    local_boundary = origin_data['local_bound']
+    domain_boundary = 100-DOMAIN_PERFORMANCE_DICT[origin_data['topic']]
+    if return_dict:
+        return {
+            "global_boundary": global_boundary,
+            "local_boundary": local_boundary,
+            "domain_boundary": domain_boundary,
+            "combined_boundary": 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2))
+        }
+    return 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2) + N3/(domain_boundary + B3))
