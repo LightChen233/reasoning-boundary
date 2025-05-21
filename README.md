@@ -13,24 +13,24 @@
   	<a href="https://img.shields.io/badge/version-v0.0.1-blue">
       <img alt="version" src="https://img.shields.io/badge/version-v0.0.1-blue?color=FF8000?color=009922" />
     </a>
-    <a >
+    <a href="https://github.com/LightChen233/reasoning-boundary/pulls">
        <img alt="PRs-Welcome" src="https://img.shields.io/badge/PRs-Welcome-blue" />
   	</a>
-   	<a href="https://github.com/LightChen233/M3CoT/stargazers">
-       <img alt="stars" src="https://img.shields.io/github/stars/LightChen233/M3CoT" />
+   	<a href="https://github.com/LightChen233/reasoning-boundary/stargazers">
+       <img alt="stars" src="https://img.shields.io/github/stars/LightChen233/reasoning-boundary" />
   	</a>
-  	<a href="https://github.com/LightChen233/M3CoT/network/members">
-       <img alt="FORK" src="https://img.shields.io/github/forks/LightChen233/M3CoT?color=FF8000" />
+  	<a href="https://github.com/LightChen233/reasoning-boundary/network/members">
+       <img alt="FORK" src="https://img.shields.io/github/forks/LightChen233/reasoning-boundary?color=FF8000" />
   	</a>
-    <a href="https://github.com/LightChen233/M3CoT/issues">
-      <img alt="Issues" src="https://img.shields.io/github/issues/LightChen233/M3CoT?color=0088ff"/>
+    <a href="https://github.com/LightChen233/reasoning-boundary/issues">
+      <img alt="Issues" src="https://img.shields.io/github/issues/LightChen233/reasoning-boundary?color=0088ff"/>
     </a>
     <br />
 </p>
 
 <p align="center">
   	<b>
-    | <a hred="https://proceedings.neurips.cc/paper_files/paper/2024/hash/62ab1c2cb4b03e717005479efb211841-Abstract-Conference.html">NeurIPS (Oral)</a> | [<a href="https://arxiv.org/abs/2410.05695">ArXiv</a>] | [<a href="https://huggingface.co/datasets/LightChen2333/BigGSM">🤗HuggingFace</a>] |
+    | [<a hred="https://proceedings.neurips.cc/paper_files/paper/2024/hash/62ab1c2cb4b03e717005479efb211841-Abstract-Conference.html">NeurIPS (Oral)</a>] | [<a href="https://arxiv.org/abs/2410.05695">ArXiv-RBF</a>] | [<a href="https://arxiv.org/abs/2505.13307">ArXiv-RBF++</a>] | [<a href="https://huggingface.co/datasets/LightChen2333/BigGSM">🤗HuggingFace</a>] |
     </b>
     <br />
 </p>
@@ -38,7 +38,7 @@
 🌟 Any contributions via PRs, issues, emails or other methods are greatly appreciated.
 
 ## 🔥News
-- 🎖️ **We update our work to RBF++ and introduce BigGSM++ for quantify the reasoning boundary in multimodal and long chain-of-thought reasoning scenarios.**
+- 🎖️ **We update our work to [RBF++](https://arxiv.org/abs/2505.13307) and introduce BigGSM++ for quantify the reasoning boundary in multimodal and long chain-of-thought reasoning scenarios (Data is available at [Google Drive](https://drive.google.com/file/d/15tsQfyg6lRzv1Gd3MvmUf-MvlBJj7zHj/view?usp=drive_link)).**
 - 🎖️ **Our work is accepted by NeurIPS 2024 (<span style="color:red">Oral</span>).**
 - 🔥 **We have release benchmark on \[[🤗HuggingFace](https://huggingface.co/datasets/LightChen2333/BigGSM)\].**
 - 🔥 **The paper is also available on \[[ArXiv](https://arxiv.org/abs/2410.05695)\].**
