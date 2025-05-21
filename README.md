@@ -30,7 +30,7 @@
 
 <p align="center">
   	<b>
-    | [<a hred="https://proceedings.neurips.cc/paper_files/paper/2024/hash/62ab1c2cb4b03e717005479efb211841-Abstract-Conference.html">NeurIPS (Oral)</a>] | [<a href="https://arxiv.org/abs/2410.05695">ArXiv-RBF</a>] | [<a href="https://arxiv.org/abs/2505.13307">ArXiv-RBF++</a>] | [<a href="https://huggingface.co/datasets/LightChen2333/BigGSM">🤗HuggingFace</a>] |
+    | [<a hred="https://proceedings.neurips.cc/paper_files/paper/2024/hash/62ab1c2cb4b03e717005479efb211841-Abstract-Conference.html">NeurIPS(Oral)</a>] | [<a href="https://arxiv.org/abs/2410.05695">ArXiv-RBF</a>] | [<a href="https://arxiv.org/abs/2505.13307">ArXiv-RBF++</a>] | [<a href="https://huggingface.co/datasets/LightChen2333/BigGSM">🤗HuggingFace</a>] |
     </b>
     <br />
 </p>
