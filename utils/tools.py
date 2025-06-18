@@ -173,32 +173,14 @@ def get_multilingual_combined_boundary(origin_data, return_dict=False):
 def get_multi_hop_boundary(origin_data, return_dict=False):
     N1 = 10
     N2 = 10
+    B1 = 0.
     B2 = 0.2
-    B2 = 0.2
-    # if enable_cot:
-    #     return abs(r1/M + (r2 + SIGMA)/N - 0.4)
-    # else:
-    #     # return r1/M * (r2 + SIGMA)/N * 9.8 - 0.2
-    #     return abs(r1/M*2 + (r2 + SIGMA)/N - 0.4)
-    DOMAIN_PERFORMANCE_DICT = {
-        "language-science": 92.20,
-        "natural-science": 56.06,
-        "social-science": 40.17,
-        "physical-commonsense": 88.64,
-        "social-commonsense": 74.89,
-        "temporal-commonsense": 74.38,
-        "algebra": 39.57,
-        "geometry": 14.29,
-        "theory": 35.29 
-    }
     global_boundary = origin_data['global_bound']
     local_boundary = origin_data['local_bound']
-    domain_boundary = 100-DOMAIN_PERFORMANCE_DICT[origin_data['topic']]
     if return_dict:
         return {
             "global_boundary": global_boundary,
             "local_boundary": local_boundary,
-            "domain_boundary": domain_boundary,
             "combined_boundary": 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2))
         }
-    return 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2) + N3/(domain_boundary + B3))
+    return 1/(N1/(global_boundary + B1) + N2/(local_boundary + B2))
